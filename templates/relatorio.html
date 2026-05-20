@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Seletor de mês -->
+<div class="mes-selector">
+  {% set prev = opcoes_meses[1] if opcoes_meses|length > 1 else opcoes_meses[0] %}
+  <a href="/relatorio?mes={{ prev.mes }}&ano={{ prev.ano }}" class="mes-btn">‹</a>
+  <select class="mes-select" onchange="window.location.href='/relatorio?mes='+this.value.split('-')[0]+'&ano='+this.value.split('-')[1]">
+    {% for op in opcoes_meses %}
+      <option value="{{ op.mes }}-{{ op.ano }}" {% if op.mes == mes and op.ano == ano %}selected{% endif %}>
+        {{ op.label }}
+      </option>
+    {% endfor %}
+  </select>
+  <span class="mes-btn" style="visibility:hidden">›</span>
+</div>
+
+<!-- Resumo KPIs -->
+<div class="section-title">Resumo de {{ mes_nome }} {{ ano }}</div>
+<div class="relat-card">
+  <div class="relat-row">
+    <span class="relat-cat">💵 Receitas</span>
+    <span class="relat-num" style="color:var(--green)">R$ {{ "%.2f"|format(total_receitas)|replace(".", ",") }}</span>
+  </div>
+  <div class="relat-row">
+    <span class="relat-cat">💸 Gastos</span>
+    <span class="relat-num" style="color:var(--red)">R$ {{ "%.2f"|format(total_gastos)|replace(".", ",") }}</span>
+  </div>
+  <div class="relat-row">
+    <span class="relat-cat">💰 Saldo</span>
+    <span class="relat-num" style="color:{% if saldo >= 0 %}var(--green){% else %}var(--red){% endif %}">
+      {% if saldo >= 0 %}+{% endif %}R$ {{ "%.2f"|format(saldo)|replace(".", ",") }}
+    </span>
+  </div>
+  <div class="relat-row">
+    <span class="relat-cat">🔢 Transações</span>
+    <span class="relat-num">{{ n_trans }}</span>
+  </div>
+</div>
+
+<!-- Gastos por categoria -->
+{% if cats %}
+<div class="section-title">Gastos por Categoria</div>
+<div class="relat-card">
+  {% for cat, val in cats %}
+  <div class="relat-row">
+    <span class="relat-cat">{{ cat }}</span>
+    <span>
+      <span class="relat-num">R$ {{ "%.2f"|format(val)|replace(".", ",") }}</span>
+      <span class="relat-pct">{{ ((val / total_gastos * 100)|round|int) if total_gastos > 0 else 0 }}%</span>
+    </span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Por forma de pagamento -->
+{% if pagamentos %}
+<div class="section-title">Por Forma de Pagamento</div>
+<div class="relat-card">
+  {% for forma, val in pagamentos %}
+  <div class="relat-row">
+    <span class="relat-cat">{{ forma }}</span>
+    <span>
+      <span class="relat-num">R$ {{ "%.2f"|format(val)|replace(".", ",") }}</span>
+      <span class="relat-pct">{{ ((val / total_gastos * 100)|round|int) if total_gastos > 0 else 0 }}%</span>
+    </span>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Botão PDF -->
+<div style="margin: 24px 0 8px">
+  <a href="/relatorio/pdf?mes={{ mes }}&ano={{ ano }}" class="btn btn-pdf">
+    📄 Baixar Relatório PDF
+  </a>
+</div>
+
+{% endblock %}

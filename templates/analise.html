@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Seletor de mês -->
+<div class="mes-selector">
+  {% set prev = opcoes_meses[1] if opcoes_meses|length > 1 else opcoes_meses[0] %}
+  <a href="/analise?mes={{ prev.mes }}&ano={{ prev.ano }}" class="mes-btn">‹</a>
+  <select class="mes-select" onchange="window.location.href='/analise?mes='+this.value.split('-')[0]+'&ano='+this.value.split('-')[1]">
+    {% for op in opcoes_meses %}
+      <option value="{{ op.mes }}-{{ op.ano }}" {% if op.mes == mes and op.ano == ano %}selected{% endif %}>
+        {{ op.label }}
+      </option>
+    {% endfor %}
+  </select>
+  <span class="mes-btn" style="visibility:hidden">›</span>
+</div>
+
+{% if not gastos %}
+<div class="empty" style="margin-top:40px">Sem dados para {{ mes_nome }} {{ ano }}.</div>
+{% else %}
+
+<!-- Gráfico: gastos por categoria (donut) -->
+<div class="section-title">Gastos por Categoria</div>
+<div class="chart-card">
+  <div class="chart-wrap">
+    <canvas id="chartCats"></canvas>
+  </div>
+  <div class="cat-list">
+    {% set cores = ["#00D4AA","#4B9FFF","#FFD93D","#FF4B6E","#A78BFA","#FB923C","#34D399","#F472B6"] %}
+    {% for cat, val in cats %}
+    <div class="cat-item">
+      <div class="cat-dot" style="background:{{ cores[loop.index0 % cores|length] }}"></div>
+      <span class="cat-nome">{{ cat }}</span>
+      <span class="cat-pct">{{ ((val / total_gastos * 100)|round|int) if total_gastos > 0 else 0 }}%</span>
+      <span class="cat-val" style="color:{{ cores[loop.index0 % cores|length] }}">R$ {{ "%.2f"|format(val)|replace(".", ",") }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Gráfico: por forma de pagamento (barras) -->
+<div class="section-title">Por Forma de Pagamento</div>
+<div class="chart-card">
+  <div class="chart-wrap">
+    <canvas id="chartPag"></canvas>
+  </div>
+</div>
+
+<!-- Gráfico: evolução diária (área) -->
+<div class="section-title">Evolução Diária</div>
+<div class="chart-card">
+  <div class="chart-wrap tall">
+    <canvas id="chartDia"></canvas>
+  </div>
+</div>
+
+{% endif %}
+
+<script>
+const CATS_DATA = {{ cats | tojson }};
+const PAG_DATA  = {{ pagamentos | tojson }};
+const DIA_DATA  = {{ por_dia | tojson }};
+const TOTAL_G   = {{ total_gastos }};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="/static/app.js" defer></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const cores = ["#00D4AA","#4B9FFF","#FFD93D","#FF4B6E","#A78BFA","#FB923C","#34D399","#F472B6"];
+  Chart.defaults.color = "rgba(255,255,255,0.55)";
+  Chart.defaults.borderColor = "rgba(255,255,255,0.06)";
+
+  // Donut categorias
+  if (document.getElementById("chartCats") && CATS_DATA.length) {
+    new Chart(document.getElementById("chartCats"), {
+      type: "doughnut",
+      data: {
+        labels: CATS_DATA.map(c => c[0]),
+        datasets: [{ data: CATS_DATA.map(c => c[1]), backgroundColor: cores, borderWidth: 0, hoverOffset: 6 }]
+      },
+      options: {
+        cutout: "68%",
+        plugins: { legend: { display: false } },
+        responsive: true, maintainAspectRatio: false
+      }
+    });
+  }
+
+  // Barras pagamento
+  if (document.getElementById("chartPag") && PAG_DATA.length) {
+    new Chart(document.getElementById("chartPag"), {
+      type: "bar",
+      data: {
+        labels: PAG_DATA.map(p => p[0]),
+        datasets: [{ data: PAG_DATA.map(p => p[1]), backgroundColor: "#4B9FFF", borderRadius: 8, borderWidth: 0 }]
+      },
+      options: {
+        indexAxis: "y",
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { callback: v => "R$" + v.toLocaleString("pt-BR") } },
+          y: { grid: { display: false } }
+        },
+        responsive: true, maintainAspectRatio: false
+      }
+    });
+  }
+
+  // Linha diária
+  if (document.getElementById("chartDia") && DIA_DATA.length) {
+    new Chart(document.getElementById("chartDia"), {
+      type: "line",
+      data: {
+        labels: DIA_DATA.map(d => "Dia " + d[0]),
+        datasets: [{
+          data: DIA_DATA.map(d => d[1]),
+          borderColor: "#FF4B6E",
+          backgroundColor: "rgba(255,75,110,0.12)",
+          fill: true,
+          tension: 0.4,
+          pointRadius: 3,
+          pointBackgroundColor: "#FF4B6E"
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { ticks: { callback: v => "R$" + v.toLocaleString("pt-BR") } },
+          x: { grid: { display: false } }
+        },
+        responsive: true, maintainAspectRatio: false
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

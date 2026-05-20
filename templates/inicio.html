@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Seletor de mês -->
+<div class="mes-selector">
+  {% set prev = opcoes_meses[1] if opcoes_meses|length > 1 else opcoes_meses[0] %}
+  {% set next_mes = namespace(mes=mes+1, ano=ano) %}
+  {% if mes == 12 %}{% set next_mes = namespace(mes=1, ano=ano+1) %}{% endif %}
+
+  <a href="/?mes={{ prev.mes }}&ano={{ prev.ano }}" class="mes-btn">‹</a>
+
+  <select class="mes-select" onchange="window.location.href='/?mes='+this.value.split('-')[0]+'&ano='+this.value.split('-')[1]">
+    {% for op in opcoes_meses %}
+      <option value="{{ op.mes }}-{{ op.ano }}" {% if op.mes == mes and op.ano == ano %}selected{% endif %}>
+        {{ op.label }}
+      </option>
+    {% endfor %}
+  </select>
+
+  {% if (mes < mes|int or ano < ano|int) or loop is not defined %}
+  <a href="/?mes={{ next_mes.mes }}&ano={{ next_mes.ano }}" class="mes-btn">›</a>
+  {% else %}
+  <span class="mes-btn" style="visibility:hidden">›</span>
+  {% endif %}
+</div>
+
+<!-- Saldo hero -->
+<div class="saldo-hero">
+  <div class="saldo-label">Saldo do Mês</div>
+  <div class="saldo-valor {% if saldo >= 0 %}positivo{% else %}negativo{% endif %}" id="saldo-val">
+    {% if saldo >= 0 %}+{% endif %}R$ {{ "%.2f"|format(saldo)|replace(".", ",") }}
+  </div>
+
+  {% if total_receitas > 0 %}
+  {% set pct = [((total_receitas - total_gastos) / total_receitas * 100), 100]|min %}
+  {% set pct_show = [pct, 0]|max %}
+  <div class="progress-bar" style="margin-top:14px">
+    <div class="progress-fill" style="width: {{ pct_show|int }}%"></div>
+  </div>
+  <div class="progress-label">{{ pct_show|int }}% disponível das receitas</div>
+  {% endif %}
+</div>
+
+<!-- KPI cards -->
+<div class="kpi-grid">
+  <div class="kpi-card verde">
+    <div class="kpi-label">Receitas</div>
+    <div class="kpi-valor" data-count="{{ total_receitas }}">R$ {{ "%.2f"|format(total_receitas)|replace(".", ",") }}</div>
+  </div>
+  <div class="kpi-card vermelho">
+    <div class="kpi-label">Gastos</div>
+    <div class="kpi-valor" data-count="{{ total_gastos }}">R$ {{ "%.2f"|format(total_gastos)|replace(".", ",") }}</div>
+  </div>
+  <div class="kpi-card azul">
+    <div class="kpi-label">Saldo</div>
+    <div class="kpi-valor">{% if saldo >= 0 %}+{% endif %}R$ {{ "%.2f"|format(saldo|abs)|replace(".", ",") }}</div>
+  </div>
+  <div class="kpi-card amarelo">
+    <div class="kpi-label">Transações</div>
+    <div class="kpi-valor">{{ n_trans }}</div>
+  </div>
+</div>
+
+<!-- Análise de economia -->
+{% if alertas %}
+<div class="section-title">💡 Análise de Economia</div>
+<div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px">
+  {% for a in alertas %}
+  <div class="alerta-card alerta-{{ a.tipo }}">
+    <div class="alerta-titulo">{{ a.titulo }}</div>
+    <div class="alerta-msg">{{ a.msg }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Últimas transações -->
+<div class="section-title">Últimas Transações</div>
+
+{% if gastos %}
+<div class="tx-list">
+  {% for g in gastos[:10] %}
+  <div class="tx-item">
+    <div class="tx-icon">
+      {% set cat_lower = g.categoria|lower %}
+      {% if "mercado" in cat_lower or "super" in cat_lower %}🛒
+      {% elif "lanche" in cat_lower or "comida" in cat_lower or "alimento" in cat_lower %}🍔
+      {% elif "transport" in cat_lower or "uber" in cat_lower or "combustiv" in cat_lower %}🚗
+      {% elif "saude" in cat_lower or "farm" in cat_lower or "medic" in cat_lower %}💊
+      {% elif "lazer" in cat_lower or "cinema" in cat_lower or "jogo" in cat_lower %}🎮
+      {% elif "roupa" in cat_lower or "vestuario" in cat_lower %}👕
+      {% elif "conta" in cat_lower or "luz" in cat_lower or "agua" in cat_lower %}💡
+      {% else %}💳
+      {% endif %}
+    </div>
+    <div class="tx-info">
+      <div class="tx-cat">{{ g.categoria }}</div>
+      <div class="tx-meta">{{ g.data_hora.strftime("%d/%m") }} · {{ g.forma_pagamento }}</div>
+    </div>
+    <div class="tx-valor">−R$ {{ "%.2f"|format(g.valor)|replace(".", ",") }}</div>
+    <form method="POST" action="/gasto/{{ g.id }}/delete" onsubmit="return confirm('Remover este gasto?')">
+      <input type="hidden" name="mes" value="{{ mes }}">
+      <input type="hidden" name="ano" value="{{ ano }}">
+      <button type="submit" class="tx-delete">🗑</button>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty">Nenhum gasto registrado neste mês.<br>Use o bot no Telegram para registrar.</div>
+{% endif %}
+
+{% endblock %}

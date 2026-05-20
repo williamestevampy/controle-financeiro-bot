@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0D0D14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Financeiro">
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="apple-touch-icon" href="/static/icon-192.png">
+  <link rel="stylesheet" href="/static/style.css">
+  <title>Financeiro — Login</title>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-icon">💰</div>
+    <h1 class="login-title">Financeiro</h1>
+    <p class="login-sub">Digite sua senha para continuar</p>
+
+    <form method="POST" action="/login">
+      <input
+        type="password"
+        name="senha"
+        class="login-input {% if erro %}erro{% endif %}"
+        placeholder="••••••••"
+        autofocus
+        autocomplete="current-password"
+      >
+      {% if erro %}
+        <p class="login-erro">Senha incorreta. Tente novamente.</p>
+      {% endif %}
+      <button type="submit" class="login-btn">Entrar</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

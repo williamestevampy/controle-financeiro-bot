@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0D0D14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Financeiro">
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="apple-touch-icon" href="/static/icon-192.png">
+  <link rel="stylesheet" href="/static/style.css">
+  <title>Financeiro</title>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <span class="topbar-title">💰 Financeiro</span>
+    <a href="/logout" class="topbar-logout">Sair</a>
+  </header>
+
+  <main class="main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="/?mes={{ mes }}&ano={{ ano }}" class="nav-tab {% if tab == 'inicio' %}active{% endif %}">
+      <span class="nav-icon">🏠</span>
+      <span>Início</span>
+    </a>
+    <a href="/analise?mes={{ mes }}&ano={{ ano }}" class="nav-tab {% if tab == 'analise' %}active{% endif %}">
+      <span class="nav-icon">📊</span>
+      <span>Análise</span>
+    </a>
+    <a href="/receitas?mes={{ mes }}&ano={{ ano }}" class="nav-tab {% if tab == 'receitas' %}active{% endif %}">
+      <span class="nav-icon">💵</span>
+      <span>Receitas</span>
+    </a>
+    <a href="/relatorio?mes={{ mes }}&ano={{ ano }}" class="nav-tab {% if tab == 'relatorio' %}active{% endif %}">
+      <span class="nav-icon">📄</span>
+      <span>Relatório</span>
+    </a>
+  </nav>
+
+</div>
+<script src="/static/app.js" defer></script>
+</body>
+</html>

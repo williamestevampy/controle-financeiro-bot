@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Seletor de mês -->
+<div class="mes-selector">
+  {% set prev = opcoes_meses[1] if opcoes_meses|length > 1 else opcoes_meses[0] %}
+  <a href="/receitas?mes={{ prev.mes }}&ano={{ prev.ano }}" class="mes-btn">‹</a>
+  <select class="mes-select" onchange="window.location.href='/receitas?mes='+this.value.split('-')[0]+'&ano='+this.value.split('-')[1]">
+    {% for op in opcoes_meses %}
+      <option value="{{ op.mes }}-{{ op.ano }}" {% if op.mes == mes and op.ano == ano %}selected{% endif %}>
+        {{ op.label }}
+      </option>
+    {% endfor %}
+  </select>
+  <span class="mes-btn" style="visibility:hidden">›</span>
+</div>
+
+<!-- Lista de proventos -->
+<div class="section-title">Receitas de {{ mes_nome }} {{ ano }}</div>
+
+{% if proventos %}
+<div class="tx-list" style="margin-bottom:20px">
+  {% for p in proventos %}
+  <div class="prov-item">
+    <div class="tx-icon">💵</div>
+    <div class="prov-info">
+      <div class="prov-desc">{{ p.descricao }}</div>
+      <div class="prov-dia">
+        {% if p.dia %}Dia {{ p.dia }}{% else %}{{ p.data_hora.strftime("%d/%m") }}{% endif %}
+      </div>
+    </div>
+    <div class="prov-val">+R$ {{ "%.2f"|format(p.valor)|replace(".", ",") }}</div>
+    <form method="POST" action="/provento/{{ p.id }}/delete" onsubmit="return confirm('Remover esta receita?')">
+      <input type="hidden" name="mes" value="{{ mes }}">
+      <input type="hidden" name="ano" value="{{ ano }}">
+      <button type="submit" class="tx-delete">🗑</button>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+
+<div style="text-align:right; font-size:0.85rem; color:var(--muted); margin-bottom:20px">
+  Total: <strong style="color:var(--green)">R$ {{ "%.2f"|format(total_receitas)|replace(".", ",") }}</strong>
+</div>
+{% else %}
+<div class="empty">Nenhuma receita em {{ mes_nome }} {{ ano }}.</div>
+{% endif %}
+
+<!-- Formulário novo provento -->
+<div class="form-card">
+  <div class="form-title">+ Registrar Receita</div>
+  <form method="POST" action="/provento">
+    <input type="hidden" name="mes" value="{{ mes }}">
+    <input type="hidden" name="ano" value="{{ ano }}">
+
+    <div class="form-group">
+      <label class="form-label">Descrição</label>
+      <input type="text" name="descricao" class="form-input" placeholder="Ex: Salário, Freelance..." required>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Valor (R$)</label>
+      <input type="number" name="valor" class="form-input" placeholder="0,00" step="0.01" min="0.01" required>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Dia do mês (opcional)</label>
+      <input type="number" name="dia" class="form-input" placeholder="Ex: 5, 15, 30" min="1" max="31">
+    </div>
+
+    <button type="submit" class="btn btn-primary">💾 Salvar Receita</button>
+  </form>
+</div>
+
+{% endblock %}
