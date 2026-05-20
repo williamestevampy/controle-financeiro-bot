@@ -19,34 +19,43 @@
 <div class="empty" style="margin-top:40px">Sem dados para {{ mes_nome }} {{ ano }}.</div>
 {% else %}
 
-<!-- Gráfico: gastos por categoria (donut) -->
-<div class="section-title">Gastos por Categoria</div>
-<div class="chart-card">
-  <div class="chart-wrap">
-    <canvas id="chartCats"></canvas>
-  </div>
-  <div class="cat-list">
-    {% set cores = ["#00D4AA","#4B9FFF","#FFD93D","#FF4B6E","#A78BFA","#FB923C","#34D399","#F472B6"] %}
-    {% for cat, val in cats %}
-    <div class="cat-item">
-      <div class="cat-dot" style="background:{{ cores[loop.index0 % cores|length] }}"></div>
-      <span class="cat-nome">{{ cat }}</span>
-      <span class="cat-pct">{{ ((val / total_gastos * 100)|round|int) if total_gastos > 0 else 0 }}%</span>
-      <span class="cat-val" style="color:{{ cores[loop.index0 % cores|length] }}">R$ {{ "%.2f"|format(val)|replace(".", ",") }}</span>
+<!-- Linha superior: donut + barras lado a lado no desktop -->
+<div class="charts-row">
+
+  <!-- Gráfico: gastos por categoria (donut) -->
+  <div>
+    <div class="section-title">Gastos por Categoria</div>
+    <div class="chart-card">
+      <div class="chart-wrap">
+        <canvas id="chartCats"></canvas>
+      </div>
+      <div class="cat-list">
+        {% set cores = ["#00D4AA","#4B9FFF","#FFD93D","#FF4B6E","#A78BFA","#FB923C","#34D399","#F472B6"] %}
+        {% for cat, val in cats %}
+        <div class="cat-item">
+          <div class="cat-dot" style="background:{{ cores[loop.index0 % cores|length] }}"></div>
+          <span class="cat-nome">{{ cat }}</span>
+          <span class="cat-pct">{{ ((val / total_gastos * 100)|round|int) if total_gastos > 0 else 0 }}%</span>
+          <span class="cat-val" style="color:{{ cores[loop.index0 % cores|length] }}">R$ {{ "%.2f"|format(val)|replace(".", ",") }}</span>
+        </div>
+        {% endfor %}
+      </div>
     </div>
-    {% endfor %}
   </div>
-</div>
 
-<!-- Gráfico: por forma de pagamento (barras) -->
-<div class="section-title">Por Forma de Pagamento</div>
-<div class="chart-card">
-  <div class="chart-wrap">
-    <canvas id="chartPag"></canvas>
+  <!-- Gráfico: por forma de pagamento (barras) -->
+  <div>
+    <div class="section-title">Por Forma de Pagamento</div>
+    <div class="chart-card">
+      <div class="chart-wrap">
+        <canvas id="chartPag"></canvas>
+      </div>
+    </div>
   </div>
-</div>
 
-<!-- Gráfico: evolução diária (área) -->
+</div><!-- /charts-row -->
+
+<!-- Gráfico: evolução diária (linha) — largura total -->
 <div class="section-title">Evolução Diária</div>
 <div class="chart-card">
   <div class="chart-wrap tall">

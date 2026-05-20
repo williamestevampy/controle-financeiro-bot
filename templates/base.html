@@ -15,38 +15,70 @@
 <body>
 <div class="app">
 
-  <header class="topbar">
-    <span class="topbar-title">💰 Financeiro</span>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button onclick="window.location.reload()" class="topbar-logout" style="background:none;border:1px solid var(--border);cursor:pointer;font-family:inherit">🔄 Atualizar</button>
-      <a href="/logout" class="topbar-logout">Sair</a>
+  <!-- SIDEBAR — visível apenas no desktop (≥1024px) via CSS -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">💰 Financeiro</div>
+    <nav class="sidebar-nav">
+      <a href="/?mes={{ mes }}&ano={{ ano }}"
+         class="sidebar-link {% if tab == 'inicio' %}active{% endif %}">
+        <span class="sidebar-icon">🏠</span> Início
+      </a>
+      <a href="/analise?mes={{ mes }}&ano={{ ano }}"
+         class="sidebar-link {% if tab == 'analise' %}active{% endif %}">
+        <span class="sidebar-icon">📊</span> Análise
+      </a>
+      <a href="/receitas?mes={{ mes }}&ano={{ ano }}"
+         class="sidebar-link {% if tab == 'receitas' %}active{% endif %}">
+        <span class="sidebar-icon">💵</span> Receitas
+      </a>
+      <a href="/relatorio?mes={{ mes }}&ano={{ ano }}"
+         class="sidebar-link {% if tab == 'relatorio' %}active{% endif %}">
+        <span class="sidebar-icon">📄</span> Relatório
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button onclick="window.location.reload()" class="sidebar-action">🔄 Atualizar</button>
+      <a href="/logout" class="sidebar-action sidebar-logout">Sair</a>
     </div>
-  </header>
+  </aside>
 
-  <main class="main-content">
-    {% block content %}{% endblock %}
-  </main>
+  <!-- CORPO PRINCIPAL (topbar + conteúdo + bottom nav) -->
+  <div class="main-body">
 
-  <nav class="bottom-nav">
-    <a href="/?mes={{ mes }}&ano={{ ano }}" class="nav-tab {% if tab == 'inicio' %}active{% endif %}">
-      <span class="nav-icon">🏠</span>
-      <span>Início</span>
-    </a>
-    <a href="/analise?mes={{ mes }}&ano={{ ano }}" class="nav-tab {% if tab == 'analise' %}active{% endif %}">
-      <span class="nav-icon">📊</span>
-      <span>Análise</span>
-    </a>
-    <a href="/receitas?mes={{ mes }}&ano={{ ano }}" class="nav-tab {% if tab == 'receitas' %}active{% endif %}">
-      <span class="nav-icon">💵</span>
-      <span>Receitas</span>
-    </a>
-    <a href="/relatorio?mes={{ mes }}&ano={{ ano }}" class="nav-tab {% if tab == 'relatorio' %}active{% endif %}">
-      <span class="nav-icon">📄</span>
-      <span>Relatório</span>
-    </a>
-  </nav>
+    <header class="topbar">
+      <span class="topbar-title">💰 Financeiro</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button onclick="window.location.reload()" class="topbar-logout" style="background:none;border:1px solid var(--border);cursor:pointer;font-family:inherit">🔄 Atualizar</button>
+        <a href="/logout" class="topbar-logout">Sair</a>
+      </div>
+    </header>
 
-</div>
+    <main class="main-content">
+      {% block content %}{% endblock %}
+    </main>
+
+    <nav class="bottom-nav">
+      <a href="/?mes={{ mes }}&ano={{ ano }}" class="nav-tab {% if tab == 'inicio' %}active{% endif %}">
+        <span class="nav-icon">🏠</span>
+        <span>Início</span>
+      </a>
+      <a href="/analise?mes={{ mes }}&ano={{ ano }}" class="nav-tab {% if tab == 'analise' %}active{% endif %}">
+        <span class="nav-icon">📊</span>
+        <span>Análise</span>
+      </a>
+      <a href="/receitas?mes={{ mes }}&ano={{ ano }}" class="nav-tab {% if tab == 'receitas' %}active{% endif %}">
+        <span class="nav-icon">💵</span>
+        <span>Receitas</span>
+      </a>
+      <a href="/relatorio?mes={{ mes }}&ano={{ ano }}" class="nav-tab {% if tab == 'relatorio' %}active{% endif %}">
+        <span class="nav-icon">📄</span>
+        <span>Relatório</span>
+      </a>
+    </nav>
+
+  </div><!-- /main-body -->
+
+</div><!-- /app -->
 <script src="/static/app.js" defer></script>
 </body>
 </html>

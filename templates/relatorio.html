@@ -15,66 +15,81 @@
   <span class="mes-btn" style="visibility:hidden">›</span>
 </div>
 
-<!-- Resumo KPIs -->
-<div class="section-title">Resumo de {{ mes_nome }} {{ ano }}</div>
-<div class="relat-card">
-  <div class="relat-row">
-    <span class="relat-cat">💵 Receitas</span>
-    <span class="relat-num" style="color:var(--green)">R$ {{ "%.2f"|format(total_receitas)|replace(".", ",") }}</span>
-  </div>
-  <div class="relat-row">
-    <span class="relat-cat">💸 Gastos</span>
-    <span class="relat-num" style="color:var(--red)">R$ {{ "%.2f"|format(total_gastos)|replace(".", ",") }}</span>
-  </div>
-  <div class="relat-row">
-    <span class="relat-cat">💰 Saldo</span>
-    <span class="relat-num" style="color:{% if saldo >= 0 %}var(--green){% else %}var(--red){% endif %}">
-      {% if saldo >= 0 %}+{% endif %}R$ {{ "%.2f"|format(saldo)|replace(".", ",") }}
-    </span>
-  </div>
-  <div class="relat-row">
-    <span class="relat-cat">🔢 Transações</span>
-    <span class="relat-num">{{ n_trans }}</span>
-  </div>
-</div>
+<!-- Grid desktop: 2 colunas -->
+<div class="desktop-grid">
 
-<!-- Gastos por categoria -->
-{% if cats %}
-<div class="section-title">Gastos por Categoria</div>
-<div class="relat-card">
-  {% for cat, val in cats %}
-  <div class="relat-row">
-    <span class="relat-cat">{{ cat }}</span>
-    <span>
-      <span class="relat-num">R$ {{ "%.2f"|format(val)|replace(".", ",") }}</span>
-      <span class="relat-pct">{{ ((val / total_gastos * 100)|round|int) if total_gastos > 0 else 0 }}%</span>
-    </span>
-  </div>
-  {% endfor %}
-</div>
-{% endif %}
+  <!-- Coluna esquerda: resumo + categorias -->
+  <div class="col-left">
 
-<!-- Por forma de pagamento -->
-{% if pagamentos %}
-<div class="section-title">Por Forma de Pagamento</div>
-<div class="relat-card">
-  {% for forma, val in pagamentos %}
-  <div class="relat-row">
-    <span class="relat-cat">{{ forma }}</span>
-    <span>
-      <span class="relat-num">R$ {{ "%.2f"|format(val)|replace(".", ",") }}</span>
-      <span class="relat-pct">{{ ((val / total_gastos * 100)|round|int) if total_gastos > 0 else 0 }}%</span>
-    </span>
-  </div>
-  {% endfor %}
-</div>
-{% endif %}
+    <!-- Resumo KPIs -->
+    <div class="section-title">Resumo de {{ mes_nome }} {{ ano }}</div>
+    <div class="relat-card">
+      <div class="relat-row">
+        <span class="relat-cat">💵 Receitas</span>
+        <span class="relat-num" style="color:var(--green)">R$ {{ "%.2f"|format(total_receitas)|replace(".", ",") }}</span>
+      </div>
+      <div class="relat-row">
+        <span class="relat-cat">💸 Gastos</span>
+        <span class="relat-num" style="color:var(--red)">R$ {{ "%.2f"|format(total_gastos)|replace(".", ",") }}</span>
+      </div>
+      <div class="relat-row">
+        <span class="relat-cat">💰 Saldo</span>
+        <span class="relat-num" style="color:{% if saldo >= 0 %}var(--green){% else %}var(--red){% endif %}">
+          {% if saldo >= 0 %}+{% endif %}R$ {{ "%.2f"|format(saldo)|replace(".", ",") }}
+        </span>
+      </div>
+      <div class="relat-row">
+        <span class="relat-cat">🔢 Transações</span>
+        <span class="relat-num">{{ n_trans }}</span>
+      </div>
+    </div>
 
-<!-- Botão PDF -->
-<div style="margin: 24px 0 8px">
-  <a href="/relatorio/pdf?mes={{ mes }}&ano={{ ano }}" class="btn btn-pdf">
-    📄 Baixar Relatório PDF
-  </a>
-</div>
+    <!-- Gastos por categoria -->
+    {% if cats %}
+    <div class="section-title">Gastos por Categoria</div>
+    <div class="relat-card">
+      {% for cat, val in cats %}
+      <div class="relat-row">
+        <span class="relat-cat">{{ cat }}</span>
+        <span>
+          <span class="relat-num">R$ {{ "%.2f"|format(val)|replace(".", ",") }}</span>
+          <span class="relat-pct">{{ ((val / total_gastos * 100)|round|int) if total_gastos > 0 else 0 }}%</span>
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+  </div><!-- /col-left -->
+
+  <!-- Coluna direita: formas de pagamento + PDF -->
+  <div class="col-right">
+
+    <!-- Por forma de pagamento -->
+    {% if pagamentos %}
+    <div class="section-title">Por Forma de Pagamento</div>
+    <div class="relat-card">
+      {% for forma, val in pagamentos %}
+      <div class="relat-row">
+        <span class="relat-cat">{{ forma }}</span>
+        <span>
+          <span class="relat-num">R$ {{ "%.2f"|format(val)|replace(".", ",") }}</span>
+          <span class="relat-pct">{{ ((val / total_gastos * 100)|round|int) if total_gastos > 0 else 0 }}%</span>
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Botão PDF -->
+    <div style="margin: 24px 0 8px">
+      <a href="/relatorio/pdf?mes={{ mes }}&ano={{ ano }}" class="btn btn-pdf">
+        📄 Baixar Relatório PDF
+      </a>
+    </div>
+
+  </div><!-- /col-right -->
+
+</div><!-- /desktop-grid -->
 
 {% endblock %}
