@@ -200,7 +200,26 @@ def processar(msg):
         db.close()
 
 
+def _health_server():
+    import os
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+    port = int(os.getenv("PORT", 10000))
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b"ok")
+        def log_message(self, *args):
+            pass  # silencia logs do servidor HTTP
+
+    HTTPServer(("0.0.0.0", port), Handler).serve_forever()
+
+
 def main():
+    import threading
+    threading.Thread(target=_health_server, daemon=True).start()
+
     print("=" * 45)
     print("  Bot Financeiro — Modo Polling  v5")
     print("  Ctrl+C para parar")
@@ -221,7 +240,7 @@ def main():
                     except Exception as e:
                         print(f"Erro ao processar mensagem: {e}")
         except requests.exceptions.Timeout:
-            pass  # timeout do long-polling é normal
+            pass
         except Exception as e:
             print(f"Erro na conexão: {e}")
             time.sleep(3)
