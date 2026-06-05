@@ -219,15 +219,31 @@ def _health_server():
     HTTPServer(("0.0.0.0", port), Handler).serve_forever()
 
 
+def _pegar_offset_inicial():
+    """Descarta todas as mensagens pendentes e retorna o próximo offset."""
+    try:
+        r = requests.get(f"{BASE}/getUpdates", params={"offset": -1, "timeout": 0}, timeout=10)
+        updates = r.json().get("result", [])
+        if updates:
+            return updates[-1]["update_id"] + 1
+    except Exception:
+        pass
+    return 0
+
+
 def main():
     import threading
     threading.Thread(target=_health_server, daemon=True).start()
 
     print("=" * 45)
-    print("  Bot Financeiro — Modo Polling  v5")
+    print("  Bot Financeiro — Modo Polling  v6")
     print("  Ctrl+C para parar")
     print("=" * 45)
-    offset = 0
+
+    # Descarta mensagens acumuladas durante downtime/deploy
+    offset = _pegar_offset_inicial()
+    print(f"  Offset inicial: {offset}")
+
     while True:
         try:
             r = requests.get(
