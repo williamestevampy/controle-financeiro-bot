@@ -63,6 +63,41 @@
   </div>
 </div>
 
+<!-- Lista de todas as transações com editar/deletar -->
+{% if gastos %}
+<div class="section-title" style="margin-top:24px">Todas as Transações</div>
+<div class="tx-list">
+  {% for g in gastos %}
+  <div class="tx-item">
+    <div class="tx-icon">
+      {% set cat_lower = g.categoria|lower %}
+      {% if "mercado" in cat_lower or "super" in cat_lower %}🛒
+      {% elif "lanche" in cat_lower or "comida" in cat_lower %}🍔
+      {% elif "transport" in cat_lower or "uber" in cat_lower or "combustiv" in cat_lower %}🚗
+      {% elif "saude" in cat_lower or "farm" in cat_lower or "medic" in cat_lower %}💊
+      {% elif "lazer" in cat_lower or "cinema" in cat_lower %}🎮
+      {% elif "roupa" in cat_lower %}👕
+      {% elif "conta" in cat_lower or "luz" in cat_lower or "agua" in cat_lower %}💡
+      {% else %}💳
+      {% endif %}
+    </div>
+    <div class="tx-info">
+      <div class="tx-cat">{{ g.categoria }}</div>
+      <div class="tx-meta">{{ g.data_hora.strftime("%d/%m %H:%M") }} · {{ g.forma_pagamento }}</div>
+    </div>
+    <div class="tx-valor">−R$ {{ "%.2f"|format(g.valor)|replace(".", ",") }}</div>
+    <button type="button" class="tx-delete"
+      onclick="abrirEdicao({{ g.id }},'{{ g.categoria }}',{{ g.valor }},'{{ g.forma_pagamento }}',{{ mes }},{{ ano }})">✏️</button>
+    <form method="POST" action="/gasto/{{ g.id }}/delete" onsubmit="return confirm('Remover este gasto?')">
+      <input type="hidden" name="mes" value="{{ mes }}">
+      <input type="hidden" name="ano" value="{{ ano }}">
+      <button type="submit" class="tx-delete">🗑</button>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
 {% endif %}
 
 <script>

@@ -79,6 +79,67 @@
   </div><!-- /main-body -->
 
 </div><!-- /app -->
+
+<!-- Modal de edição de gasto -->
+<div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:#1A1A2E;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:24px;width:90%;max-width:380px">
+    <h3 style="margin:0 0 20px;color:#fff;font-size:1.1rem">✏️ Editar Gasto</h3>
+    <form id="edit-form" method="POST">
+      <input type="hidden" name="mes" id="edit-mes">
+      <input type="hidden" name="ano" id="edit-ano">
+      <div style="margin-bottom:14px">
+        <label style="display:block;color:rgba(255,255,255,0.6);font-size:0.8rem;margin-bottom:6px">Categoria</label>
+        <input type="text" name="categoria" id="edit-categoria"
+          style="width:100%;background:#0D0D14;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:10px 12px;color:#fff;font-size:1rem;box-sizing:border-box">
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="display:block;color:rgba(255,255,255,0.6);font-size:0.8rem;margin-bottom:6px">Valor (R$)</label>
+        <input type="number" step="0.01" min="0.01" name="valor" id="edit-valor"
+          style="width:100%;background:#0D0D14;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:10px 12px;color:#fff;font-size:1rem;box-sizing:border-box">
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="display:block;color:rgba(255,255,255,0.6);font-size:0.8rem;margin-bottom:6px">Forma de Pagamento</label>
+        <select name="forma_pagamento" id="edit-forma"
+          style="width:100%;background:#0D0D14;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:10px 12px;color:#fff;font-size:1rem;box-sizing:border-box">
+          <option value="Dinheiro">Dinheiro</option>
+          <option value="Pix">Pix</option>
+          <option value="Crédito">Crédito</option>
+          <option value="Débito">Débito</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button type="button" onclick="fecharModal()"
+          style="flex:1;padding:12px;background:rgba(255,255,255,0.08);border:none;border-radius:8px;color:#fff;font-size:0.95rem;cursor:pointer">
+          Cancelar
+        </button>
+        <button type="submit"
+          style="flex:1;padding:12px;background:#4B9FFF;border:none;border-radius:8px;color:#fff;font-size:0.95rem;font-weight:600;cursor:pointer">
+          Salvar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function abrirEdicao(id, categoria, valor, forma, mes, ano) {
+  document.getElementById('edit-form').action = '/gasto/' + id + '/edit';
+  document.getElementById('edit-categoria').value = categoria;
+  document.getElementById('edit-valor').value = valor;
+  document.getElementById('edit-forma').value = forma;
+  document.getElementById('edit-mes').value = mes;
+  document.getElementById('edit-ano').value = ano;
+  const modal = document.getElementById('edit-modal');
+  modal.style.display = 'flex';
+}
+function fecharModal() {
+  document.getElementById('edit-modal').style.display = 'none';
+}
+document.getElementById('edit-modal').addEventListener('click', function(e) {
+  if (e.target === this) fecharModal();
+});
+</script>
+
 <script src="/static/app.js" defer></script>
 </body>
 </html>

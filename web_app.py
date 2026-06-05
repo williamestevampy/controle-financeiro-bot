@@ -329,6 +329,33 @@ async def salvar_provento(
     return RedirectResponse(f"/receitas?mes={m}&ano={a}", status_code=302)
 
 
+@app.post("/gasto/{gasto_id}/edit")
+async def editar_gasto(
+    gasto_id: int,
+    request: Request,
+    categoria: str = Form(...),
+    valor: float = Form(...),
+    forma_pagamento: str = Form(...),
+    mes: int = Form(0),
+    ano: int = Form(0),
+    db: Session = Depends(get_db),
+):
+    if not _is_authed(request):
+        return _redirect_login()
+
+    obj = db.query(models.Gasto).filter(models.Gasto.id == gasto_id).first()
+    if obj:
+        obj.categoria = categoria.strip().capitalize()
+        obj.valor = valor
+        obj.forma_pagamento = forma_pagamento
+        db.commit()
+
+    hoje = datetime.now()
+    m = mes or hoje.month
+    a = ano or hoje.year
+    return RedirectResponse(f"/?mes={m}&ano={a}", status_code=302)
+
+
 @app.post("/gasto/{gasto_id}/delete")
 async def deletar_gasto(
     gasto_id: int,

@@ -107,6 +107,8 @@
           <div class="tx-meta">{{ g.data_hora.strftime("%d/%m") }} · {{ g.forma_pagamento }}</div>
         </div>
         <div class="tx-valor">−R$ {{ "%.2f"|format(g.valor)|replace(".", ",") }}</div>
+        <button type="button" class="tx-delete"
+          onclick="abrirEdicao({{ g.id }},'{{ g.categoria }}',{{ g.valor }},'{{ g.forma_pagamento }}',{{ mes }},{{ ano }})">✏️</button>
         <form method="POST" action="/gasto/{{ g.id }}/delete" onsubmit="return confirm('Remover este gasto?')">
           <input type="hidden" name="mes" value="{{ mes }}">
           <input type="hidden" name="ano" value="{{ ano }}">
