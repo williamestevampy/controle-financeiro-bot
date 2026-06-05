@@ -219,31 +219,54 @@ def _health_server():
     HTTPServer(("0.0.0.0", port), Handler).serve_forever()
 
 
-def _pegar_offset_inicial():
-    """Descarta todas as mensagens pendentes e retorna o próximo offset."""
+def _ja_processado(update_id: int) -> bool:
+    """Retorna True se este update já foi processado (proteção anti-duplicata)."""
+    db = SessionLocal()
     try:
-        r = requests.get(f"{BASE}/getUpdates", params={"offset": -1, "timeout": 0}, timeout=10)
-        updates = r.json().get("result", [])
-        if updates:
-            return updates[-1]["update_id"] + 1
+        existe = db.query(models.UpdateProcessado).filter(
+            models.UpdateProcessado.update_id == update_id
+        ).first()
+        if existe:
+            return True
+        db.add(models.UpdateProcessado(update_id=update_id))
+        db.commit()
+        return False
     except Exception:
-        pass
-    return 0
+        db.rollback()
+        return False
+    finally:
+        db.close()
+
+
+def _limpar_updates_antigos():
+    """Remove registros com mais de 48h para não crescer indefinidamente."""
+    from datetime import timedelta
+    db = SessionLocal()
+    try:
+        limite = datetime.now() - timedelta(hours=48)
+        db.query(models.UpdateProcessado).filter(
+            models.UpdateProcessado.processado_em < limite
+        ).delete()
+        db.commit()
+    except Exception:
+        db.rollback()
+    finally:
+        db.close()
 
 
 def main():
     import threading
     threading.Thread(target=_health_server, daemon=True).start()
 
+    models.Base.metadata.create_all(bind=SessionLocal().bind)
+
     print("=" * 45)
-    print("  Bot Financeiro — Modo Polling  v6")
+    print("  Bot Financeiro — Modo Polling  v7")
     print("  Ctrl+C para parar")
     print("=" * 45)
 
-    # Descarta mensagens acumuladas durante downtime/deploy
-    offset = _pegar_offset_inicial()
-    print(f"  Offset inicial: {offset}")
-
+    offset = 0
+    ciclo = 0
     while True:
         try:
             r = requests.get(
@@ -254,10 +277,16 @@ def main():
             for upd in r.json().get("result", []):
                 offset = upd["update_id"] + 1
                 if "message" in upd:
+                    if _ja_processado(upd["update_id"]):
+                        print(f"Update {upd['update_id']} ignorado (duplicata)")
+                        continue
                     try:
                         processar(upd["message"])
                     except Exception as e:
                         print(f"Erro ao processar mensagem: {e}")
+            ciclo += 1
+            if ciclo % 200 == 0:
+                _limpar_updates_antigos()
         except requests.exceptions.Timeout:
             pass
         except Exception as e:

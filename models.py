@@ -19,3 +19,9 @@ class Provento(Base):
     valor = Column(Float, nullable=False)
     dia = Column(Integer, nullable=True)
     data_hora = Column(DateTime, default=datetime.now)
+
+class UpdateProcessado(Base):
+    __tablename__ = "updates_processados"
+
+    update_id = Column(Integer, primary_key=True)
+    processado_em = Column(DateTime, default=datetime.now)
