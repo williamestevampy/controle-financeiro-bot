@@ -1,6 +1,11 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from database import Base
+
+_BR = timezone(timedelta(hours=-3))
+
+def _now_br():
+    return datetime.now(_BR).replace(tzinfo=None)
 
 class Gasto(Base):
     __tablename__ = "gastos"
@@ -9,7 +14,7 @@ class Gasto(Base):
     valor = Column(Float, nullable=False)
     categoria = Column(String(100), nullable=False)
     forma_pagamento = Column(String(50), default="Dinheiro")
-    data_hora = Column(DateTime, default=datetime.now)
+    data_hora = Column(DateTime, default=_now_br)
 
 class Provento(Base):
     __tablename__ = "proventos"
@@ -18,10 +23,10 @@ class Provento(Base):
     descricao = Column(String(150), nullable=False)
     valor = Column(Float, nullable=False)
     dia = Column(Integer, nullable=True)
-    data_hora = Column(DateTime, default=datetime.now)
+    data_hora = Column(DateTime, default=_now_br)
 
 class UpdateProcessado(Base):
     __tablename__ = "updates_processados"
 
     update_id = Column(Integer, primary_key=True)
-    processado_em = Column(DateTime, default=datetime.now)
+    processado_em = Column(DateTime, default=_now_br)

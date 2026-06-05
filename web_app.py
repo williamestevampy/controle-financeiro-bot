@@ -1,6 +1,11 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from collections import defaultdict
+
+_BR = timezone(timedelta(hours=-3))
+
+def _now_br():
+    return datetime.now(_BR).replace(tzinfo=None)
 
 from fastapi import FastAPI, Request, Depends, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
@@ -58,7 +63,7 @@ def _redirect_login():
 
 
 def _opcoes_meses():
-    hoje = datetime.now()
+    hoje = _now_br()
     opcoes = []
     for i in range(12):
         mes = hoje.month - i
@@ -124,7 +129,7 @@ def _carregar_dados(db: Session, ano: int, mes: int) -> dict:
     gastos = db.query(models.Gasto).filter(
         models.Gasto.data_hora >= inicio,
         models.Gasto.data_hora < fim,
-    ).order_by(desc(models.Gasto.data_hora)).all()
+    ).order_by(desc(models.Gasto.data_hora), desc(models.Gasto.id)).all()
 
     proventos = db.query(models.Provento).filter(
         models.Provento.data_hora >= inicio,
@@ -192,7 +197,7 @@ async def inicio(request: Request, mes: int = 0, ano: int = 0, db: Session = Dep
     if not _is_authed(request):
         return _redirect_login()
 
-    hoje = datetime.now()
+    hoje = _now_br()
     if mes == 0:
         mes = hoje.month
     if ano == 0:
@@ -214,7 +219,7 @@ async def analise(request: Request, mes: int = 0, ano: int = 0, db: Session = De
     if not _is_authed(request):
         return _redirect_login()
 
-    hoje = datetime.now()
+    hoje = _now_br()
     if mes == 0:
         mes = hoje.month
     if ano == 0:
@@ -236,7 +241,7 @@ async def receitas(request: Request, mes: int = 0, ano: int = 0, db: Session = D
     if not _is_authed(request):
         return _redirect_login()
 
-    hoje = datetime.now()
+    hoje = _now_br()
     if mes == 0:
         mes = hoje.month
     if ano == 0:
@@ -258,7 +263,7 @@ async def relatorio(request: Request, mes: int = 0, ano: int = 0, db: Session = 
     if not _is_authed(request):
         return _redirect_login()
 
-    hoje = datetime.now()
+    hoje = _now_br()
     if mes == 0:
         mes = hoje.month
     if ano == 0:
@@ -323,7 +328,7 @@ async def salvar_provento(
     db.add(models.Provento(descricao=descricao.strip().capitalize(), valor=valor, dia=dia_int))
     db.commit()
 
-    hoje = datetime.now()
+    hoje = _now_br()
     m = mes or hoje.month
     a = ano or hoje.year
     return RedirectResponse(f"/receitas?mes={m}&ano={a}", status_code=302)
@@ -350,7 +355,7 @@ async def editar_gasto(
         obj.forma_pagamento = forma_pagamento
         db.commit()
 
-    hoje = datetime.now()
+    hoje = _now_br()
     m = mes or hoje.month
     a = ano or hoje.year
     return RedirectResponse(f"/?mes={m}&ano={a}", status_code=302)
@@ -372,7 +377,7 @@ async def deletar_gasto(
         db.delete(obj)
         db.commit()
 
-    hoje = datetime.now()
+    hoje = _now_br()
     m = mes or hoje.month
     a = ano or hoje.year
     return RedirectResponse(f"/?mes={m}&ano={a}", status_code=302)
@@ -394,7 +399,7 @@ async def deletar_provento(
         db.delete(obj)
         db.commit()
 
-    hoje = datetime.now()
+    hoje = _now_br()
     m = mes or hoje.month
     a = ano or hoje.year
     return RedirectResponse(f"/receitas?mes={m}&ano={a}", status_code=302)
@@ -407,7 +412,7 @@ async def download_pdf(request: Request, mes: int = 0, ano: int = 0, db: Session
     if not _is_authed(request):
         return _redirect_login()
 
-    hoje = datetime.now()
+    hoje = _now_br()
     m = mes or hoje.month
     a = ano or hoje.year
 

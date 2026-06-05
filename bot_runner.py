@@ -3,7 +3,12 @@ import re
 import time
 import requests
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+_BR = timezone(timedelta(hours=-3))
+
+def _now_br():
+    return datetime.now(_BR).replace(tzinfo=None)
 from sqlalchemy import desc
 from database import SessionLocal
 import models
@@ -64,7 +69,7 @@ def processar(msg):
 
         # /extrato
         if texto_limpo == "/extrato":
-            agora      = datetime.now()
+            agora      = _now_br()
             inicio_mes = agora.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
             g_rec  = db.query(models.Gasto).order_by(desc(models.Gasto.data_hora)).limit(10).all()
             g_mes  = db.query(models.Gasto).filter(models.Gasto.data_hora >= inicio_mes).all()
@@ -88,7 +93,7 @@ def processar(msg):
 
         # /mensal
         if texto_limpo in ("/mensal", "/mes"):
-            agora      = datetime.now()
+            agora      = _now_br()
             inicio_mes = agora.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
             g_mes = db.query(models.Gasto).filter(models.Gasto.data_hora >= inicio_mes).all()
             p_mes = db.query(models.Provento).filter(models.Provento.data_hora >= inicio_mes).all()
@@ -114,7 +119,7 @@ def processar(msg):
 
         # /proventos
         if texto_limpo == "/proventos":
-            agora      = datetime.now()
+            agora      = _now_br()
             inicio_mes = agora.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
             provs = db.query(models.Provento).filter(
                 models.Provento.data_hora >= inicio_mes
@@ -240,10 +245,10 @@ def _ja_processado(update_id: int) -> bool:
 
 def _limpar_updates_antigos():
     """Remove registros com mais de 48h para não crescer indefinidamente."""
-    from datetime import timedelta
     db = SessionLocal()
     try:
-        limite = datetime.now() - timedelta(hours=48)
+        from datetime import timedelta
+        limite = _now_br() - timedelta(hours=48)
         db.query(models.UpdateProcessado).filter(
             models.UpdateProcessado.processado_em < limite
         ).delete()
